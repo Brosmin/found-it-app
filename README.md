@@ -1,8 +1,8 @@
-# 🎓 FOUND IT - Smart Lost and Found System
+# FOUND IT - Smart Lost and Found System
 
-## Computer Engineering Final Year Project
+<!-- Last updated: 2025-08-03 - Manual deployment trigger -->
 
-A comprehensive, AI-powered lost and found management system with smart matching algorithms, real-time notifications, and advanced analytics.
+A comprehensive Computer Engineering Final Year Project featuring AI-powered smart matching for lost and found items.
 
 ### 🌟 Key Features
 
