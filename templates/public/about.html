@@ -1,0 +1,42 @@
+{% extends "public/base.html" %}
+
+{% block public_content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-info-circle me-2"></i>About Us</h2>
+            </div>
+            <div class="card-body">
+                {% if system_info.about_content %}
+                    {{ system_info.about_content|safe }}
+                {% else %}
+                    <h4>Welcome to our FOUND IT Information System</h4>
+                    <p>Our mission is to help reunite people with their lost belongings and provide a platform for managing found items across campus. We understand how frustrating it can be to lose something important, and we're here to help.</p>
+                    
+                    <h5>How it works:</h5>
+                    <ul>
+                        <li><strong>Found an item?</strong> Post it on our platform with details and location where it was found.</li>
+                        <li><strong>Lost something?</strong> Browse through our database of found items to see if your item has been turned in.</li>
+                        <li><strong>Contact information:</strong> Each post includes contact details so you can reach out directly.</li>
+                        <li><strong>Categories:</strong> Items are organized by categories to make searching easier.</li>
+                    </ul>
+                    
+                    <h5>Our commitment:</h5>
+                    <ul>
+                        <li>All items are reviewed by our staff before being published</li>
+                        <li>We maintain accurate location information for better tracking</li>
+                        <li>Your privacy and security are our top priorities</li>
+                        <li>We work to ensure quick responses to inquiries</li>
+                    </ul>
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-heart me-2"></i>
+                        <strong>Remember:</strong> Every item posted brings us one step closer to reuniting someone with their lost belongings. Your contribution matters!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

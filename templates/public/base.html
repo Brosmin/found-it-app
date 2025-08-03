@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+            <i class="fas fa-search-location me-2"></i>
+            {{ system_info.site_name or 'Lost and Found' }}
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('items') }}">Items</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('post_item') }}">Post Item</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('about') }}">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('contact') }}">Contact</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% if current_user.role == 'admin' %}
+                                <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container my-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    {% block public_content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>{{ system_info.site_name or 'FOUND IT' }}</h5>
+                <p class="text-muted">Helping you find what you've lost and return what you've found.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <h6>Contact Information</h6>
+                {% if system_info.contact_email %}
+                    <p><i class="fas fa-envelope me-2"></i>{{ system_info.contact_email }}</p>
+                {% endif %}
+                {% if system_info.contact_phone %}
+                    <p><i class="fas fa-phone me-2"></i>{{ system_info.contact_phone }}</p>
+                {% endif %}
+                {% if system_info.contact_address %}
+                    <p><i class="fas fa-map-marker-alt me-2"></i>{{ system_info.contact_address }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">
+            <p class="text-muted">&copy; 2024 FOUND IT. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+{% endblock %} 

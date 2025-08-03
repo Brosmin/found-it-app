@@ -1,0 +1,173 @@
+/* Custom styles for FOUND IT Information System */
+
+/* General styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Item cards */
+.item-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-card .card-text {
+    flex: 1;
+}
+
+/* Image styling */
+.item-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Status badges */
+.badge-found {
+    background-color: #28a745;
+}
+
+.badge-lost {
+    background-color: #dc3545;
+}
+
+.badge-claimed {
+    background-color: #6c757d;
+}
+
+/* Admin sidebar */
+.sidebar {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,0.8);
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-link:hover {
+    color: white;
+    background-color: rgba(255,255,255,0.1);
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    color: white;
+    background-color: rgba(255,255,255,0.2);
+    border-left: 4px solid white;
+}
+
+/* Dashboard stats cards */
+.stats-card {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.stats-card .stats-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* Form styling */
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.btn-primary:hover {
+    background-color: #5a6fd8;
+    border-color: #5a6fd8;
+}
+
+/* Table styling */
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+    font-weight: 600;
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+/* Footer */
+.footer {
+    background-color: #343a40;
+    color: white;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+    }
+    
+    .stats-card .stats-number {
+        font-size: 2rem;
+    }
+}
+
+/* Loading animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5a6fd8;
+} 

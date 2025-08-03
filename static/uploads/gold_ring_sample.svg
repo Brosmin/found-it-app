@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="300" height="200" fill="#FFD700"/>
+    <text x="150" y="80" font-family="Arial, sans-serif" font-size="48" text-anchor="middle" fill="white">💍</text>
+    <text x="150" y="120" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" fill="white">Gold Ring</text>
+    <text x="150" y="150" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="white">Sample Image</text>
+</svg>

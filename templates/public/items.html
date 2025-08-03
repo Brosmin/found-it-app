@@ -1,0 +1,86 @@
+{% extends "public/base.html" %}
+
+{% block public_content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>FOUND IT Items</h2>
+            <a href="{{ url_for('post_item') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Post New Item
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter me-2"></i>Filter by Category</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('items') }}" class="list-group-item list-group-item-action {% if not request.args.get('category') %}active{% endif %}">
+                        All Categories
+                    </a>
+                    {% for category in categories %}
+                    <a href="{{ url_for('items', category=category.id) }}" 
+                       class="list-group-item list-group-item-action {% if request.args.get('category')|int == category.id %}active{% endif %}">
+                        {{ category.name }}
+                        <span class="badge bg-secondary rounded-pill float-end">{{ category.items|length }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-9">
+        {% if items %}
+        <div class="row">
+            {% for item in items %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 position-relative">
+                    {% if item.image_path %}
+                    <img src="{{ url_for('static', filename=item.image_path) }}" class="card-img-top item-image" alt="{{ item.title }}">
+                    {% else %}
+                    <div class="card-img-top item-image bg-light d-flex align-items-center justify-content-center">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <span class="badge {% if item.status == 'found' %}bg-success{% elif item.status == 'lost' %}bg-warning{% else %}bg-info{% endif %} status-badge">
+                        {{ item.status.title() }}
+                    </span>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <p class="card-text text-muted">{{ item.description[:100] }}{% if item.description|length > 100 %}...{% endif %}</p>
+                        {% if item.location %}
+                        <p class="card-text"><small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ item.location }}</small></p>
+                        {% endif %}
+                        <p class="card-text"><small class="text-muted">Category: {{ item.category.name }}</small></p>
+                        <p class="card-text"><small class="text-muted">Posted: {{ item.created_at.strftime('%Y-%m-%d') }}</small></p>
+                        {% if item.contact_info %}
+                        <p class="card-text"><small class="text-muted"><i class="fas fa-phone me-1"></i>{{ item.contact_info }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No items found</h4>
+            <p class="text-muted">
+                {% if request.args.get('category') %}
+                    No items found in this category.
+                {% else %}
+                    No items have been posted yet.
+                {% endif %}
+            </p>
+            <a href="{{ url_for('post_item') }}" class="btn btn-primary">Post First Item</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
