@@ -5,7 +5,11 @@
     <div class="container">
         <a class="navbar-brand" href="{{ url_for('home') }}">
             <i class="fas fa-search-location me-2"></i>
-            {{ system_info.site_name or 'Lost and Found' }}
+            {% if system_info and system_info.site_name %}
+                {{ system_info.site_name }}
+            {% else %}
+                FOUND IT
+            {% endif %}
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -82,18 +86,18 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <h5>{{ system_info.site_name or 'FOUND IT' }}</h5>
+                <h5>{% if system_info and system_info.site_name %}{{ system_info.site_name }}{% else %}FOUND IT{% endif %}</h5>
                 <p class="text-muted">Helping you find what you've lost and return what you've found.</p>
             </div>
             <div class="col-md-6 text-md-end">
                 <h6>Contact Information</h6>
-                {% if system_info.contact_email %}
+                {% if system_info and system_info.contact_email %}
                     <p><i class="fas fa-envelope me-2"></i>{{ system_info.contact_email }}</p>
                 {% endif %}
-                {% if system_info.contact_phone %}
+                {% if system_info and system_info.contact_phone %}
                     <p><i class="fas fa-phone me-2"></i>{{ system_info.contact_phone }}</p>
                 {% endif %}
-                {% if system_info.contact_address %}
+                {% if system_info and system_info.contact_address %}
                     <p><i class="fas fa-map-marker-alt me-2"></i>{{ system_info.contact_address }}</p>
                 {% endif %}
             </div>
