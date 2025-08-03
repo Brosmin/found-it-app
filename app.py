@@ -278,6 +278,24 @@ def nl2br_filter(text):
         return text.replace('\n', '<br>')
     return text
 
+# Context processor to make system_info available globally
+@app.context_processor
+def inject_system_info():
+    try:
+        system_info = get_system_info()
+        return {'system_info': system_info}
+    except Exception as e:
+        print(f"Context processor error: {e}")
+        # Fallback if system_info fails
+        fallback_info = type('SystemInfo', (), {
+            'site_name': 'FOUND IT',
+            'about_content': 'Welcome to FOUND IT - Your Smart Lost and Found System!',
+            'contact_email': 'admin@foundit.com',
+            'contact_phone': '+234 810 678 1706',
+            'contact_address': 'ABU Zaria, Main Campus, Nigeria'
+        })()
+        return {'system_info': fallback_info}
+
 # Error handlers
 @app.errorhandler(500)
 def internal_error(error):
@@ -376,18 +394,11 @@ def items():
     
     items = query.all()
     categories = Category.query.all()
+    system_info = get_system_info()
     
     return render_template('public/items.html', items=items, categories=categories, 
-                         search=search, selected_category=category_id, selected_status=status, sort_by=sort_by)
-    category_id = request.args.get('category', type=int)
-    if category_id:
-        items = Item.query.filter_by(category_id=category_id, is_approved=True).order_by(Item.created_at.desc()).all()
-    else:
-        items = Item.query.filter_by(is_approved=True).order_by(Item.created_at.desc()).all()
-    
-    categories = Category.query.all()
-    system_info = get_system_info()
-    return render_template('public/items.html', items=items, categories=categories, system_info=system_info)
+                         search=search, selected_category=category_id, selected_status=status, 
+                         sort_by=sort_by, system_info=system_info)
 
 @app.route('/post_item', methods=['GET', 'POST'])
 def post_item():
