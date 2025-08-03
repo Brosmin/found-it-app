@@ -278,6 +278,19 @@ def nl2br_filter(text):
         return text.replace('\n', '<br>')
     return text
 
+# Error handlers
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('errors/500.html'), 500
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    return render_template('errors/403.html'), 403
+
 # Public Routes
 @app.route('/')
 def home():
