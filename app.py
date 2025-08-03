@@ -281,15 +281,51 @@ def nl2br_filter(text):
 # Error handlers
 @app.errorhandler(500)
 def internal_error(error):
-    return render_template('errors/500.html'), 500
+    try:
+        return render_template('errors/500.html'), 500
+    except:
+        return """
+        <html>
+        <head><title>500 Internal Server Error</title></head>
+        <body>
+        <h1>Internal Server Error</h1>
+        <p>The server encountered an internal error and was unable to complete your request.</p>
+        <a href="/">Go Home</a>
+        </body>
+        </html>
+        """, 500
 
 @app.errorhandler(404)
 def not_found_error(error):
-    return render_template('errors/404.html'), 404
+    try:
+        return render_template('errors/404.html'), 404
+    except:
+        return """
+        <html>
+        <head><title>404 Not Found</title></head>
+        <body>
+        <h1>Page Not Found</h1>
+        <p>The page you're looking for doesn't exist.</p>
+        <a href="/">Go Home</a>
+        </body>
+        </html>
+        """, 404
 
 @app.errorhandler(403)
 def forbidden_error(error):
-    return render_template('errors/403.html'), 403
+    try:
+        return render_template('errors/403.html'), 403
+    except:
+        return """
+        <html>
+        <head><title>403 Forbidden</title></head>
+        <body>
+        <h1>Access Denied</h1>
+        <p>You don't have permission to access this page.</p>
+        <a href="/">Go Home</a>
+        </body>
+        </html>
+        """, 403
 
 # Public Routes
 @app.route('/')
@@ -1117,46 +1153,69 @@ def admin_analytics():
 
 # Initialize database and create default data
 with app.app_context():
-    db.create_all()
-    print("✅ Database tables created successfully!")
-    
-    # Create default admin user if none exists
-    if not User.query.filter_by(role='admin').first():
-        admin = User(
-            username='admin',
-            email='admin@foundit.com',
-            password_hash=generate_password_hash('admin123'),
-            role='admin'
-        )
-        db.session.add(admin)
-        db.session.commit()
-        print("✅ Default admin user created: username='admin', password='admin123'")
-    
-    # Create default categories if none exist
-    if Category.query.count() == 0:
-        categories = [
-            Category(name='Electronics', description='Phones, laptops, tablets, etc.', icon='fas fa-mobile-alt', color='#007bff'),
-            Category(name='Jewelry', description='Rings, necklaces, watches, etc.', icon='fas fa-gem', color='#ffc107'),
-            Category(name='Clothing', description='Shirts, pants, jackets, etc.', icon='fas fa-tshirt', color='#28a745'),
-            Category(name='Documents', description='IDs, cards, papers, etc.', icon='fas fa-file-alt', color='#dc3545'),
-            Category(name='Keys', description='Car keys, house keys, etc.', icon='fas fa-key', color='#6c757d'),
-            Category(name='Books', description='Textbooks, notebooks, etc.', icon='fas fa-book', color='#17a2b8'),
-            Category(name='Sports', description='Sports equipment, gym items, etc.', icon='fas fa-futbol', color='#fd7e14'),
-            Category(name='Other', description='Miscellaneous items', icon='fas fa-box', color='#6f42c1')
-        ]
-        for category in categories:
-            db.session.add(category)
-        db.session.commit()
-        print("✅ Enhanced default categories created!")
-    
-    # Create system info if it doesn't exist
-    system_info = get_system_info()
-    if system_info.site_name == 'Lost and Found Information System':
-        system_info.site_name = 'FOUND IT'
-        db.session.commit()
-        print("✅ System name updated to 'FOUND IT'")
-    
-    print("✅ Database initialization completed!")
+    try:
+        db.create_all()
+        print("✅ Database tables created successfully!")
+        
+        # Create default admin user if none exists
+        if not User.query.filter_by(role='admin').first():
+            admin = User(
+                username='admin',
+                email='admin@foundit.com',
+                password_hash=generate_password_hash('admin123'),
+                role='admin'
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print("✅ Default admin user created: username='admin', password='admin123'")
+        
+        # Create default categories if none exist
+        if Category.query.count() == 0:
+            categories = [
+                Category(name='Electronics', description='Phones, laptops, tablets, etc.', icon='fas fa-mobile-alt', color='#007bff'),
+                Category(name='Jewelry', description='Rings, necklaces, watches, etc.', icon='fas fa-gem', color='#ffc107'),
+                Category(name='Clothing', description='Shirts, pants, jackets, etc.', icon='fas fa-tshirt', color='#28a745'),
+                Category(name='Documents', description='IDs, cards, papers, etc.', icon='fas fa-file-alt', color='#dc3545'),
+                Category(name='Keys', description='Car keys, house keys, etc.', icon='fas fa-key', color='#6c757d'),
+                Category(name='Books', description='Textbooks, notebooks, etc.', icon='fas fa-book', color='#17a2b8'),
+                Category(name='Sports', description='Sports equipment, gym items, etc.', icon='fas fa-futbol', color='#fd7e14'),
+                Category(name='Other', description='Miscellaneous items', icon='fas fa-box', color='#6f42c1')
+            ]
+            for category in categories:
+                db.session.add(category)
+            db.session.commit()
+            print("✅ Enhanced default categories created!")
+        
+        # Create system info if it doesn't exist
+        system_info = get_system_info()
+        if not system_info.about_content:
+            system_info.about_content = """
+            Welcome to FOUND IT - Your Smart Lost and Found System!
+            
+            Our AI-powered platform helps you find lost items and return found ones quickly and efficiently. 
+            With advanced matching algorithms, real-time notifications, and comprehensive search capabilities, 
+            we make the process of reuniting people with their belongings as simple as possible.
+            
+            Features:
+            • Smart AI Matching
+            • Real-time Notifications
+            • Advanced Search & Filtering
+            • Mobile-Ready APIs
+            • Comprehensive Analytics
+            
+            Whether you've lost something or found an item, FOUND IT is here to help!
+            """
+            system_info.contact_email = "admin@foundit.com"
+            system_info.contact_phone = "+234 810 678 1706"
+            system_info.contact_address = "ABU Zaria, Main Campus, Nigeria"
+            db.session.commit()
+            print("✅ System information updated!")
+        
+        print("✅ Database initialization completed!")
+        
+    except Exception as e:
+        print(f"❌ Database initialization error: {e}")
+        # Continue anyway - the app should still work
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000))) 
