@@ -381,13 +381,27 @@ def post_item():
             keywords=','.join(keywords)
         )
         
-        # Handle image upload
-        if 'image' in request.files:
-            file = request.files['image']
-            if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                item.image_path = f'uploads/{filename}'
+        # Handle image upload (optional - gracefully handle errors)
+        try:
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename:
+                    # Ensure upload directory exists
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    
+                    # Validate file type
+                    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+                    if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_extensions:
+                        filename = secure_filename(file.filename)
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(file_path)
+                        item.image_path = f'uploads/{filename}'
+                    else:
+                        flash('Invalid file type. Please upload an image (PNG, JPG, JPEG, GIF, WEBP).', 'warning')
+        except Exception as e:
+            # Log error but don't fail the entire submission
+            print(f"Image upload error: {e}")
+            flash('Image upload failed, but item was posted successfully.', 'warning')
         
         db.session.add(item)
         db.session.commit()
@@ -797,12 +811,27 @@ def add_item():
             is_approved=is_approved
         )
         
-        if 'image' in request.files:
-            file = request.files['image']
-            if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                item.image_path = f'uploads/{filename}'
+        # Handle image upload (optional - gracefully handle errors)
+        try:
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename:
+                    # Ensure upload directory exists
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    
+                    # Validate file type
+                    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+                    if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_extensions:
+                        filename = secure_filename(file.filename)
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(file_path)
+                        item.image_path = f'uploads/{filename}'
+                    else:
+                        flash('Invalid file type. Please upload an image (PNG, JPG, JPEG, GIF, WEBP).', 'warning')
+        except Exception as e:
+            # Log error but don't fail the entire submission
+            print(f"Image upload error: {e}")
+            flash('Image upload failed, but item was added successfully.', 'warning')
         
         db.session.add(item)
         db.session.commit()
@@ -825,12 +854,27 @@ def edit_item(id):
         item.contact_info = request.form.get('contact_info')
         item.is_approved = 'is_approved' in request.form
         
-        if 'image' in request.files:
-            file = request.files['image']
-            if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                item.image_path = f'uploads/{filename}'
+        # Handle image upload (optional - gracefully handle errors)
+        try:
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename:
+                    # Ensure upload directory exists
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    
+                    # Validate file type
+                    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+                    if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_extensions:
+                        filename = secure_filename(file.filename)
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(file_path)
+                        item.image_path = f'uploads/{filename}'
+                    else:
+                        flash('Invalid file type. Please upload an image (PNG, JPG, JPEG, GIF, WEBP).', 'warning')
+        except Exception as e:
+            # Log error but don't fail the entire submission
+            print(f"Image upload error: {e}")
+            flash('Image upload failed, but item was updated successfully.', 'warning')
         
         db.session.commit()
         flash('Item updated successfully!', 'success')
