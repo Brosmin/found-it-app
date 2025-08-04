@@ -214,12 +214,29 @@ def load_user(user_id):
 
 # Helper Functions
 def get_system_info():
-    info = SystemInfo.query.first()
-    if not info:
-        info = SystemInfo()
-        db.session.add(info)
-        db.session.commit()
-    return info
+    try:
+        info = SystemInfo.query.first()
+        if not info:
+            info = SystemInfo(
+                site_name='FOUND IT',
+                about_content='Welcome to FOUND IT - Your Smart Lost and Found System!',
+                contact_email='admin@foundit.com',
+                contact_phone='+234 810 678 1706',
+                contact_address='ABU Zaria, Main Campus, Nigeria'
+            )
+            db.session.add(info)
+            db.session.commit()
+        return info
+    except Exception as e:
+        print(f"get_system_info error: {e}")
+        # Return a fallback object
+        return type('SystemInfo', (), {
+            'site_name': 'FOUND IT',
+            'about_content': 'Welcome to FOUND IT - Your Smart Lost and Found System!',
+            'contact_email': 'admin@foundit.com',
+            'contact_phone': '+234 810 678 1706',
+            'contact_address': 'ABU Zaria, Main Campus, Nigeria'
+        })()
 
 def create_notification(user_id, title, message, notification_type='system'):
     """Create a new notification"""
@@ -282,8 +299,12 @@ def nl2br_filter(text):
 @app.context_processor
 def inject_system_info():
     try:
-        system_info = get_system_info()
-        return {'system_info': system_info}
+        with app.app_context():
+            system_info = get_system_info()
+            if system_info:
+                return {'system_info': system_info}
+            else:
+                raise Exception("SystemInfo not found")
     except Exception as e:
         print(f"Context processor error: {e}")
         # Fallback if system_info fails
