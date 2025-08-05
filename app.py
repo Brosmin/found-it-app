@@ -1,24 +1,32 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+import os
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
-import os
-from datetime import datetime, timedelta
-import sqlite3
 import re
 from difflib import SequenceMatcher
 import json
 from collections import Counter
 import math
+from datetime import datetime, timedelta
+import sqlite3
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lost_and_found.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
+# Persistent database configuration for Render
+# Use environment variable for database path or default to persistent location
+DATABASE_PATH = os.environ.get('DATABASE_PATH', '/tmp/persistent_database.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DATABASE_PATH}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Ensure the database directory exists
+os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
+
+# Upload folder configuration
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 

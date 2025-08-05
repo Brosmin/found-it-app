@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: found-it-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.7
+      - key: DATABASE_PATH
+        value: /opt/render/project/src/persistent_database.db
+    disk:
+      name: persistent-storage
+      mountPath: /opt/render/project/src
+      sizeGB: 1 
