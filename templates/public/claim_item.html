@@ -1,0 +1,107 @@
+{% extends "public/base.html" %}
+
+{% block public_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">
+                    <i class="fas fa-hand-holding-heart me-2"></i>Claim Item
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Item Information -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        {% if item.image_path %}
+                        <img src="{{ url_for('static', filename=item.image_path) }}" class="img-fluid rounded" alt="{{ item.title }}">
+                        {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h4>{{ item.title }}</h4>
+                        <p class="text-muted">{{ item.description }}</p>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ item.location or 'Location not specified' }}</small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted"><i class="fas fa-tag me-1"></i>{{ item.category.name }}</small>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <small class="text-muted"><i class="fas fa-calendar me-1"></i>Found: {{ item.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted"><i class="fas fa-clock me-1"></i>{{ item.created_at.strftime('%H:%M') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Claim Form -->
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="claimer_name" class="form-label">Your Full Name *</label>
+                            <input type="text" class="form-control" id="claimer_name" name="claimer_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="claimer_email" class="form-label">Your Email *</label>
+                            <input type="email" class="form-control" id="claimer_email" name="claimer_email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="claimer_phone" class="form-label">Your Phone Number</label>
+                            <input type="tel" class="form-control" id="claimer_phone" name="claimer_phone" placeholder="+234 XXX XXX XXXX">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="claim_reason" class="form-label">Why are you claiming this item?</label>
+                            <select class="form-select" id="claim_reason" name="claim_reason">
+                                <option value="">Select a reason...</option>
+                                <option value="I lost this item">I lost this item</option>
+                                <option value="This belongs to me">This belongs to me</option>
+                                <option value="This belongs to someone I know">This belongs to someone I know</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="claim_proof" class="form-label">Proof of Ownership *</label>
+                        <textarea class="form-control" id="claim_proof" name="claim_proof" rows="4" 
+                                  placeholder="Please provide detailed proof that this item belongs to you. For example:&#10;- Describe unique identifying features&#10;- Mention any damage or wear patterns&#10;- Provide serial numbers if applicable&#10;- Describe where and when you lost it&#10;- Any other identifying details" required></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Be as detailed as possible. This helps us verify your claim quickly.
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Important:</strong> Your claim will be reviewed by our staff. Please provide accurate information. 
+                        You will be contacted once your claim is reviewed.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('items') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Items
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-1"></i>Submit Claim
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -16,14 +16,42 @@ import sqlite3
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 
-# Persistent database configuration for Render
+# Enhanced database configuration for better persistence
 # Use environment variable for database path or default to persistent location
-DATABASE_PATH = os.environ.get('DATABASE_PATH', '/tmp/persistent_database.db')
+DATABASE_PATH = os.environ.get('DATABASE_PATH', '/opt/render/project/src/data/found_it.db')
+
+# Fallback paths for different environments
+if not os.path.exists(os.path.dirname(DATABASE_PATH)):
+    # Try alternative paths
+    alternative_paths = [
+        '/opt/render/project/src/data/found_it.db',  # Render persistent storage
+        '/tmp/found_it.db',  # Local development fallback
+        './instance/found_it.db',  # Flask default instance folder
+        './found_it.db'  # Current directory fallback
+    ]
+    
+    for alt_path in alternative_paths:
+        if os.path.exists(os.path.dirname(alt_path)) or os.path.dirname(alt_path) == '.':
+            DATABASE_PATH = alt_path
+            break
+
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DATABASE_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Ensure the database directory exists
-os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
+# Ensure the database directory exists with better error handling
+try:
+    db_dir = os.path.dirname(DATABASE_PATH)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+        print(f"✅ Created database directory: {db_dir}")
+except Exception as e:
+    print(f"⚠️ Warning: Could not create database directory: {e}")
+    # Fallback to current directory
+    DATABASE_PATH = './found_it.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DATABASE_PATH}'
+    print(f"🔄 Fallback database path: {DATABASE_PATH}")
+
+print(f"🗄️ Database path: {DATABASE_PATH}")
 
 # Upload folder configuration
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -59,7 +87,7 @@ class Item(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    status = db.Column(db.String(20), default='found')  # found, lost, claimed
+    status = db.Column(db.String(20), default='found')  # found, lost, claimed, archived
     location = db.Column(db.String(200))
     contact_info = db.Column(db.String(200))
     image_path = db.Column(db.String(500))
@@ -76,6 +104,14 @@ class Item(db.Model):
     size = db.Column(db.String(50))  # Size information
     material = db.Column(db.String(100))  # Material type
     condition = db.Column(db.String(50))  # New, used, damaged, etc.
+    
+    # Claiming system fields
+    claimed_at = db.Column(db.DateTime)  # When item was claimed
+    claimed_by = db.Column(db.String(200))  # Name of person claiming
+    claimer_email = db.Column(db.String(120))  # Email of person claiming
+    claimer_phone = db.Column(db.String(20))  # Phone of person claiming
+    claim_proof = db.Column(db.Text)  # Description of proof provided
+    claim_notes = db.Column(db.Text)  # Admin notes about the claim
     
     # Matching fields
     matched_items = db.relationship('ItemMatch', foreign_keys='ItemMatch.item1_id', backref='item1')
@@ -128,6 +164,24 @@ class Analytics(db.Model):
     matches_found = db.Column(db.Integer, default=0)
     new_users = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Claim(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), nullable=False)
+    claimer_name = db.Column(db.String(200), nullable=False)
+    claimer_email = db.Column(db.String(120), nullable=False)
+    claimer_phone = db.Column(db.String(20))
+    claim_proof = db.Column(db.Text, nullable=False)
+    claim_reason = db.Column(db.Text)
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    admin_notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime)
+    processed_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
+    # Relationships
+    item = db.relationship('Item', backref='claims')
+    admin_user = db.relationship('User', backref='processed_claims')
 
 # Smart Matching Algorithm
 class SmartMatcher:
@@ -221,6 +275,19 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Helper Functions
+def backup_database():
+    """Create a backup of the database before making changes"""
+    try:
+        if os.path.exists(DATABASE_PATH):
+            backup_path = f"{DATABASE_PATH}.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            import shutil
+            shutil.copy2(DATABASE_PATH, backup_path)
+            print(f"✅ Database backed up to: {backup_path}")
+            return backup_path
+    except Exception as e:
+        print(f"⚠️ Warning: Could not create database backup: {e}")
+    return None
+
 def get_system_info():
     try:
         info = SystemInfo.query.first()
@@ -378,7 +445,11 @@ def forbidden_error(error):
 @app.route('/')
 def home():
     categories = Category.query.all()
-    items = Item.query.filter_by(is_approved=True).order_by(Item.created_at.desc()).limit(10).all()
+    # Only show active items (found/lost) on public pages
+    items = Item.query.filter(
+        Item.is_approved == True,
+        Item.status.in_(['found', 'lost'])
+    ).order_by(Item.created_at.desc()).limit(10).all()
     system_info = get_system_info()
     
     # Update analytics
@@ -394,7 +465,11 @@ def items():
     status = request.args.get('status', '')
     sort_by = request.args.get('sort', 'newest')
     
-    query = Item.query.filter_by(is_approved=True)
+    # Only show active items (found/lost) on public pages
+    query = Item.query.filter(
+        Item.is_approved == True,
+        Item.status.in_(['found', 'lost'])
+    )
     
     if search:
         query = query.filter(
@@ -410,7 +485,7 @@ def items():
     if category_id:
         query = query.filter_by(category_id=category_id)
     
-    if status:
+    if status and status in ['found', 'lost']:
         query = query.filter_by(status=status)
     
     # Sorting
@@ -467,7 +542,8 @@ def post_item():
             size=size,
             material=material,
             condition=condition,
-            keywords=','.join(keywords)
+            keywords=','.join(keywords),
+            is_approved=True  # Items are automatically approved and visible
         )
         
         # Handle image upload (optional - gracefully handle errors)
@@ -554,6 +630,11 @@ def contact():
     
     system_info = get_system_info()
     return render_template('public/contact.html', system_info=system_info)
+
+@app.route('/mobile-app')
+def mobile_app():
+    system_info = get_system_info()
+    return render_template('public/mobile_app.html', system_info=system_info)
 
 # Smart Matching Routes
 @app.route('/matches')
@@ -796,6 +877,7 @@ def admin_dashboard():
     found_items = Item.query.filter_by(status='found').count()
     lost_items = Item.query.filter_by(status='lost').count()
     claimed_items = Item.query.filter_by(status='claimed').count()
+    archived_items = Item.query.filter_by(status='archived').count()
     total_categories = Category.query.count()
     total_users = User.query.count()
     total_messages = Message.query.count()
@@ -805,6 +887,7 @@ def admin_dashboard():
     # Recent activity
     recent_items = Item.query.order_by(Item.created_at.desc()).limit(5).all()
     recent_matches = ItemMatch.query.order_by(ItemMatch.created_at.desc()).limit(5).all()
+    recent_claims = Claim.query.order_by(Claim.created_at.desc()).limit(5).all()
     
     # Analytics data for charts
     analytics_data = get_analytics_data()
@@ -812,19 +895,25 @@ def admin_dashboard():
     # Unread notifications
     unread_notifications = Notification.query.filter_by(is_read=False).count()
     
+    # Pending claims
+    pending_claims = Claim.query.filter_by(status='pending').count()
+    
     return render_template('admin/dashboard.html', 
                          total_items=total_items,
                          found_items=found_items,
                          lost_items=lost_items,
                          claimed_items=claimed_items,
+                         archived_items=archived_items,
                          total_categories=total_categories,
                          total_users=total_users,
                          total_messages=total_messages,
                          unread_messages=unread_messages,
                          total_matches=total_matches,
                          unread_notifications=unread_notifications,
+                         pending_claims=pending_claims,
                          recent_items=recent_items,
                          recent_matches=recent_matches,
+                         recent_claims=recent_claims,
                          analytics_data=analytics_data)
 
 # Category Management
@@ -875,8 +964,14 @@ def delete_category(id):
 @app.route('/admin/items')
 @login_required
 def admin_items():
-    items = Item.query.order_by(Item.created_at.desc()).all()
-    return render_template('admin/items.html', items=items)
+    # Show all items with status filtering
+    status_filter = request.args.get('status', '')
+    if status_filter:
+        items = Item.query.filter_by(status=status_filter).order_by(Item.created_at.desc()).all()
+    else:
+        items = Item.query.order_by(Item.created_at.desc()).all()
+    
+    return render_template('admin/items.html', items=items, selected_status=status_filter)
 
 @app.route('/admin/items/add', methods=['GET', 'POST'])
 @login_required
@@ -1191,9 +1286,190 @@ def admin_analytics():
                          similar_matches=similar_matches,
                          potential_matches=potential_matches)
 
+# Claim Management Routes
+@app.route('/mark_found_by_owner/<int:item_id>')
+def mark_found_by_owner(item_id):
+    """Simple route to mark item as found by owner (archived)"""
+    item = Item.query.get_or_404(item_id)
+    
+    if item.status != 'found':
+        flash('This item cannot be marked as found by owner.', 'error')
+        return redirect(url_for('items'))
+    
+    try:
+        # Update item status to archived (found by owner)
+        item.status = 'archived'
+        item.claimed_at = datetime.utcnow()
+        item.claimed_by = 'Found by Owner'
+        item.claimer_email = 'owner@found.com'
+        item.claim_notes = 'Item marked as found by owner'
+        
+        db.session.commit()
+        
+        flash('Item has been marked as found by owner and removed from the list.', 'success')
+        return redirect(url_for('items'))
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating item: {str(e)}', 'error')
+        print(f"Mark found by owner error: {e}")
+        return redirect(url_for('items'))
+
+@app.route('/claim_item/<int:item_id>', methods=['GET', 'POST'])
+def claim_item(item_id):
+    """Public route for users to claim items"""
+    item = Item.query.get_or_404(item_id)
+    
+    # Check if item can be claimed
+    if item.status != 'found':
+        flash('This item cannot be claimed.', 'error')
+        return redirect(url_for('items'))
+    
+    if request.method == 'POST':
+        claimer_name = request.form.get('claimer_name')
+        claimer_email = request.form.get('claimer_email')
+        claimer_phone = request.form.get('claimer_phone')
+        claim_proof = request.form.get('claim_proof')
+        claim_reason = request.form.get('claim_reason')
+        
+        if not all([claimer_name, claimer_email, claim_proof]):
+            flash('Please fill in all required fields.', 'error')
+            return render_template('public/claim_item.html', item=item)
+        
+        try:
+            # Create claim record
+            claim = Claim(
+                item_id=item.id,
+                claimer_name=claimer_name,
+                claimer_email=claimer_email,
+                claimer_phone=claimer_phone,
+                claim_proof=claim_proof,
+                claim_reason=claim_reason,
+                status='pending'
+            )
+            
+            # Update item status to claimed
+            item.status = 'claimed'
+            item.claimed_at = datetime.utcnow()
+            item.claimed_by = claimer_name
+            item.claimer_email = claimer_email
+            item.claimer_phone = claimer_phone
+            item.claim_proof = claim_proof
+            
+            db.session.add(claim)
+            db.session.commit()
+            
+            # Notify admins about the claim
+            admin_users = User.query.filter_by(role='admin').all()
+            for admin in admin_users:
+                create_notification(
+                    admin.id,
+                    f'New Item Claim - {item.title}',
+                    f'Item "{item.title}" has been claimed by {claimer_name}. Please review the claim.',
+                    'alert'
+                )
+            
+            flash('Your claim has been submitted successfully! An admin will review it shortly.', 'success')
+            return redirect(url_for('items'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error submitting claim: {str(e)}', 'error')
+            print(f"Claim submission error: {e}")
+    
+    system_info = get_system_info()
+    return render_template('public/claim_item.html', item=item, system_info=system_info)
+
+@app.route('/admin/claims')
+@login_required
+def admin_claims():
+    """Admin interface for managing claims"""
+    claims = Claim.query.order_by(Claim.created_at.desc()).all()
+    return render_template('admin/claims.html', claims=claims)
+
+@app.route('/admin/claims/view/<int:claim_id>')
+@login_required
+def view_claim(claim_id):
+    """View detailed claim information"""
+    claim = Claim.query.get_or_404(claim_id)
+    return render_template('admin/view_claim.html', claim=claim)
+
+@app.route('/admin/claims/approve/<int:claim_id>')
+@login_required
+def approve_claim(claim_id):
+    """Approve a claim and archive the item"""
+    claim = Claim.query.get_or_404(claim_id)
+    
+    if claim.status != 'pending':
+        flash('This claim has already been processed.', 'error')
+        return redirect(url_for('admin_claims'))
+    
+    # Update claim status
+    claim.status = 'approved'
+    claim.processed_at = datetime.utcnow()
+    claim.processed_by = current_user.id
+    
+    # Update item status to archived
+    item = claim.item
+    item.status = 'archived'
+    item.claim_notes = f'Claim approved by {current_user.username} on {datetime.utcnow().strftime("%Y-%m-%d %H:%M")}'
+    
+    db.session.commit()
+    
+    # Create notification for claimer
+    create_notification(
+        claim.claimer_email,  # This would need to be a user ID in a real system
+        f'Claim Approved - {item.title}',
+        f'Your claim for "{item.title}" has been approved! Please contact the admin to arrange pickup.',
+        'system'
+    )
+    
+    flash('Claim approved successfully! Item has been archived.', 'success')
+    return redirect(url_for('admin_claims'))
+
+@app.route('/admin/claims/reject/<int:claim_id>', methods=['GET', 'POST'])
+@login_required
+def reject_claim(claim_id):
+    """Reject a claim and return item to found status"""
+    claim = Claim.query.get_or_404(claim_id)
+    
+    if claim.status != 'pending':
+        flash('This claim has already been processed.', 'error')
+        return redirect(url_for('admin_claims'))
+    
+    if request.method == 'POST':
+        admin_notes = request.form.get('admin_notes', '')
+        
+        # Update claim status
+        claim.status = 'rejected'
+        claim.processed_at = datetime.utcnow()
+        claim.processed_by = current_user.id
+        claim.admin_notes = admin_notes
+        
+        # Return item to found status
+        item = claim.item
+        item.status = 'found'
+        item.claimed_at = None
+        item.claimed_by = None
+        item.claimer_email = None
+        item.claimer_phone = None
+        item.claim_proof = None
+        item.claim_notes = f'Claim rejected by {current_user.username} on {datetime.utcnow().strftime("%Y-%m-%d %H:%M")}. Reason: {admin_notes}'
+        
+        db.session.commit()
+        
+        flash('Claim rejected successfully! Item has been returned to found status.', 'success')
+        return redirect(url_for('admin_claims'))
+    
+    return render_template('admin/reject_claim.html', claim=claim)
+
 # Initialize database and create default data
 with app.app_context():
     try:
+        # Create backup before making changes
+        backup_database()
+        
+        # Create all tables
         db.create_all()
         print("✅ Database tables created successfully!")
         
@@ -1242,6 +1518,7 @@ with app.app_context():
             • Advanced Search & Filtering
             • Mobile-Ready APIs
             • Comprehensive Analytics
+            • Item Claiming System
             
             Whether you've lost something or found an item, FOUND IT is here to help!
             """
@@ -1251,11 +1528,27 @@ with app.app_context():
             db.session.commit()
             print("✅ System information updated!")
         
-        print("✅ Database initialization completed!")
+        print("✅ Database initialization completed successfully!")
+        print(f"🗄️ Database location: {DATABASE_PATH}")
         
     except Exception as e:
         print(f"❌ Database initialization error: {e}")
-        # Continue anyway - the app should still work
+        print("🔄 Attempting to continue with existing database...")
+        
+        # Try to connect to existing database
+        try:
+            # Test database connection
+            db.session.execute('SELECT 1')
+            print("✅ Successfully connected to existing database!")
+        except Exception as conn_error:
+            print(f"❌ Cannot connect to database: {conn_error}")
+            print("🔄 Creating in-memory database as fallback...")
+            # Fallback to in-memory database
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+            db.init_app(app)
+            with app.app_context():
+                db.create_all()
+                print("✅ In-memory database created as fallback")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000))) 

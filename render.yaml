@@ -3,12 +3,12 @@ services:
     name: found-it-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: bash deploy.sh
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.7
       - key: DATABASE_PATH
-        value: /opt/render/project/src/persistent_database.db
+        value: /opt/render/project/src/data/found_it.db
     disk:
       name: persistent-storage
       mountPath: /opt/render/project/src

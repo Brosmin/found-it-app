@@ -1,0 +1,285 @@
+{% extends "public/base.html" %}
+
+{% block public_content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="display-4 mb-4">
+                    <i class="fas fa-mobile-alt text-primary me-3"></i>
+                    FOUND IT Mobile App
+                </h1>
+                <p class="lead text-muted">
+                    Experience FOUND IT on your mobile device with enhanced features and offline support
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-wifi fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Works Offline</h5>
+                    <p class="card-text">Use the app even without internet connection. All data syncs when you're back online.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-bell fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Push Notifications</h5>
+                    <p class="card-text">Get instant notifications when someone finds your lost item or when there's a match.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-camera fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Camera Integration</h5>
+                    <p class="card-text">Take photos directly from the app and upload them instantly to your posts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white p-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h2 class="mb-4">Download FOUND IT Mobile App</h2>
+                            <p class="lead mb-4">
+                                Get the native mobile experience with offline support, push notifications, 
+                                and seamless integration with your device.
+                            </p>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ url_for('static', filename='downloads/FOUND IT.apk') }}" 
+                                       class="btn btn-light btn-lg w-100" 
+                                       download="FOUND IT.apk">
+                                        <i class="fab fa-android me-2"></i>
+                                        Download for Android
+                                    </a>
+                                    <small class="text-light d-block mt-2">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        APK file - Direct download
+                                    </small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="#" class="btn btn-outline-light btn-lg w-100" onclick="showComingSoon()">
+                                        <i class="fab fa-apple me-2"></i>
+                                        Coming Soon for iOS
+                                    </a>
+                                    <small class="text-light d-block mt-2">
+                                        <i class="fas fa-clock me-1"></i>
+                                        App Store version in development
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h6 class="mb-3">App Features:</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled text-light">
+                                            <li><i class="fas fa-check me-2"></i>Offline functionality</li>
+                                            <li><i class="fas fa-check me-2"></i>Push notifications</li>
+                                            <li><i class="fas fa-check me-2"></i>Camera integration</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled text-light">
+                                            <li><i class="fas fa-check me-2"></i>GPS location tracking</li>
+                                            <li><i class="fas fa-check me-2"></i>Fast search & filters</li>
+                                            <li><i class="fas fa-check me-2"></i>Secure data storage</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <div class="mobile-preview">
+                                <i class="fas fa-mobile-alt fa-8x text-light mb-4"></i>
+                                <div class="qr-code-section bg-white p-4 rounded">
+                                    <i class="fas fa-qrcode fa-4x text-dark mb-3"></i>
+                                    <p class="text-dark mb-0">Scan to download</p>
+                                    <small class="text-muted">QR Code coming soon</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Installation Instructions -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-download me-2"></i>
+                        Installation Instructions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">For Android Users:</h6>
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item">Download the APK file above</li>
+                                <li class="list-group-item">Enable "Install from Unknown Sources" in Settings</li>
+                                <li class="list-group-item">Open the downloaded APK file</li>
+                                <li class="list-group-item">Follow the installation prompts</li>
+                                <li class="list-group-item">Open the app and start using!</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">For iOS Users:</h6>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                iOS version is currently in development and will be available on the App Store soon.
+                                <br><br>
+                                <strong>In the meantime:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Use the web version on your iPhone</li>
+                                    <li>Add to home screen for app-like experience</li>
+                                    <li>Check back soon for the iOS app!</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Requirements -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        System Requirements
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-secondary">Android Requirements:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Android 6.0 (API level 23) or higher</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Minimum 50MB free storage</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Internet connection for initial sync</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Camera permission (optional)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-secondary">iOS Requirements (Coming Soon):</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-clock text-warning me-2"></i>iOS 13.0 or higher</li>
+                                <li><i class="fas fa-clock text-warning me-2"></i>iPhone 6s or newer</li>
+                                <li><i class="fas fa-clock text-warning me-2"></i>Minimum 50MB free storage</li>
+                                <li><i class="fas fa-clock text-warning me-2"></i>App Store account required</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-life-ring me-2"></i>
+                        Need Help?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-question-circle fa-3x text-success mb-3"></i>
+                            <h6>Installation Issues?</h6>
+                            <p class="text-muted">Check our troubleshooting guide or contact support.</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-bug fa-3x text-warning mb-3"></i>
+                            <h6>Found a Bug?</h6>
+                            <p class="text-muted">Report issues through the app or contact us directly.</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-lightbulb fa-3x text-info mb-3"></i>
+                            <h6>Feature Request?</h6>
+                            <p class="text-muted">We'd love to hear your suggestions for improvements.</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('contact') }}" class="btn btn-primary">
+                            <i class="fas fa-envelope me-2"></i>
+                            Contact Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showComingSoon() {
+    alert('iOS version is coming soon! For now, you can use the web version on your iPhone or wait for the App Store release.');
+}
+</script>
+
+<style>
+.mobile-preview {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.qr-code-section {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.qr-code-section:hover {
+    transform: scale(1.05);
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.card {
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}
