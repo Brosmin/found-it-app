@@ -10,6 +10,9 @@
             <p>Browse through found items or post a new item you've found. Every item counts!</p>
             <a class="btn btn-light btn-lg" href="{{ url_for('items') }}" role="button">Browse Items</a>
             <a class="btn btn-outline-light btn-lg ms-2" href="{{ url_for('post_item') }}" role="button">Post Item</a>
+            <a class="btn btn-success btn-lg ms-2" href="{{ url_for('items', status='recovered') }}" role="button">
+                <i class="fas fa-undo-alt me-1"></i>Recovered Items
+            </a>
         </div>
     </div>
     <div class="col-lg-4">
@@ -35,7 +38,7 @@
     </div>
 </div>
 
-<!-- Mobile App Download Section -->
+<!-- App Info Section (keeps beauty, no download) -->
 <div class="row mt-5">
     <div class="col-12">
         <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -44,46 +47,15 @@
                     <div class="col-lg-8">
                         <h2 class="display-6 mb-3">
                             <i class="fas fa-mobile-alt me-3"></i>
-                            Get the FOUND IT Mobile App
+                            FOUND IT is available on web and mobile!
                         </h2>
                         <p class="lead mb-4">
-                            Experience FOUND IT on your mobile device with offline support, 
-                            push notifications, and a native mobile experience!
+                            Enjoy a seamless experience, smart search, and real-time updates—anywhere, anytime.
                         </p>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <a href="{{ url_for('static', filename='downloads/FOUND IT.apk') }}" 
-                                   class="btn btn-light btn-lg w-100" 
-                                   download="FOUND IT.apk">
-                                    <i class="fab fa-android me-2"></i>
-                                    Download for Android
-                                </a>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <a href="#" class="btn btn-outline-light btn-lg w-100" onclick="showComingSoon()">
-                                    <i class="fab fa-apple me-2"></i>
-                                    Coming Soon for iOS
-                                </a>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <small class="text-light">
-                                <i class="fas fa-shield-alt me-1"></i>
-                                Safe & Secure • 
-                                <i class="fas fa-wifi me-1"></i>
-                                Works Offline • 
-                                <i class="fas fa-bell me-1"></i>
-                                Push Notifications
-                            </small>
-                        </div>
                     </div>
                     <div class="col-lg-4 text-center">
                         <div class="mobile-app-preview">
                             <i class="fas fa-mobile-alt fa-6x text-light mb-3"></i>
-                            <div class="qr-code-placeholder bg-white p-3 rounded d-inline-block">
-                                <i class="fas fa-qrcode fa-3x text-dark"></i>
-                                <p class="text-dark mb-0 mt-2 small">Scan to download</p>
-                            </div>
                         </div>
                     </div>
                 </div>

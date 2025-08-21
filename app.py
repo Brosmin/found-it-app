@@ -87,7 +87,7 @@ class Item(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    status = db.Column(db.String(20), default='found')  # found, lost, claimed, archived
+    status = db.Column(db.String(20), default='found')  # found, lost, claimed, archived, recovered
     location = db.Column(db.String(200))
     contact_info = db.Column(db.String(200))
     image_path = db.Column(db.String(500))
@@ -445,10 +445,10 @@ def forbidden_error(error):
 @app.route('/')
 def home():
     categories = Category.query.all()
-    # Only show active items (found/lost) on public pages
+    # Only show active items (found/lost/recovered) on public pages
     items = Item.query.filter(
         Item.is_approved == True,
-        Item.status.in_(['found', 'lost'])
+        Item.status.in_(['found', 'lost', 'recovered'])
     ).order_by(Item.created_at.desc()).limit(10).all()
     system_info = get_system_info()
     
@@ -465,10 +465,10 @@ def items():
     status = request.args.get('status', '')
     sort_by = request.args.get('sort', 'newest')
     
-    # Only show active items (found/lost) on public pages
+    # Only show active items (found/lost/recovered) on public pages
     query = Item.query.filter(
         Item.is_approved == True,
-        Item.status.in_(['found', 'lost'])
+        Item.status.in_(['found', 'lost', 'recovered'])
     )
     
     if search:
@@ -485,7 +485,7 @@ def items():
     if category_id:
         query = query.filter_by(category_id=category_id)
     
-    if status and status in ['found', 'lost']:
+    if status and status in ['found', 'lost', 'recovered']:
         query = query.filter_by(status=status)
     
     # Sorting
