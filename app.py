@@ -1348,13 +1348,12 @@ def claim_item(item_id):
                 status='pending'
             )
             
-            # Update item status to claimed
-            item.status = 'claimed'
-            item.claimed_at = datetime.utcnow()
-            item.claimed_by = claimer_name
-            item.claimer_email = claimer_email
-            item.claimer_phone = claimer_phone
-            item.claim_proof = claim_proof
+            # Do not update item status here; status will be updated upon admin approval
+            item.claimed_at = None
+            item.claimed_by = None
+            item.claimer_email = None
+            item.claimer_phone = None
+            item.claim_proof = None
             
             db.session.add(claim)
             db.session.commit()
@@ -1409,9 +1408,14 @@ def approve_claim(claim_id):
     claim.processed_at = datetime.utcnow()
     claim.processed_by = current_user.id
     
-    # Update item status to archived
+    # Update item status to claimed
     item = claim.item
-    item.status = 'archived'
+    item.status = 'claimed'
+    item.claimed_at = datetime.utcnow()
+    item.claimed_by = claim.claimer_name
+    item.claimer_email = claim.claimer_email
+    item.claimer_phone = claim.claimer_phone
+    item.claim_proof = claim.claim_proof
     item.claim_notes = f'Claim approved by {current_user.username} on {datetime.utcnow().strftime("%Y-%m-%d %H:%M")}'
     
     db.session.commit()
